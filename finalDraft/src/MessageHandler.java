@@ -1,11 +1,7 @@
-package messageHandler;
-
-import bubble.Bubble;
 import javafx.application.Platform;
 import org.json.JSONObject;
+import org.json.JSONArray;
 import org.json.JSONException;
-
-import java.sql.Connection;
 import java.util.*;
 
 /**
@@ -469,16 +465,13 @@ public class MessageHandler {
         return bubbles.values();
     }
 
-    /**
-     * Get all connections (for GUI to render)
-     */
+    // Get all connections (for GUI to render)
     public List<Connection> getAllConnections() {
         return new ArrayList<>(connections);
     }
 
-    /**
-     * Get specific bubble by ID
-     */
+    //Get specific bubble by ID
+
     public Bubble getBubble(String id) {
         return bubbles.get(id);
     }
