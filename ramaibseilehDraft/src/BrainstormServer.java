@@ -1,28 +1,23 @@
-import java.awt.*;
-import java.net.ServerSocket;
 import java.io.*;
 import java.net.*;
 import java.util.*;
 import java.util.concurrent.*;
 
 public class BrainstormServer {
-
-//this is a port allows a single host to run multiple netwroks
     private static final int PORT = 8080;
-// we use a socket so a program can excute acroos multiple computers
     private ServerSocket serverSocket;
-    //this is to store all bubbles and connections
-    private Canvas canvasState;
+    private CanvasState canvasState;
     private List<ClientHandler> clients;
     private ExecutorService threadPool;
     private boolean running;
 
     public BrainstormServer() {
         this.canvasState = new CanvasState();
-        this.clients = new List<ClientHandler>();
+        this.clients = new CopyOnWriteArrayList<>();
         this.threadPool = Executors.newCachedThreadPool();
         this.running = true;
     }
+
     public void start() {
         try {
             serverSocket = new ServerSocket(PORT);
@@ -87,9 +82,4 @@ public class BrainstormServer {
             System.err.println("Error during shutdown: " + e.getMessage());
         }
     }
-
-
-
-
-
 }
