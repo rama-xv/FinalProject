@@ -1,6 +1,3 @@
-// Remove or comment out this import:
-// import javafx.application.Platform;
-
 import org.json.JSONObject;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -24,10 +21,8 @@ public class MessageHandler {
     private NetworkClient client;
     private String clientId;
 
+     // Constructor - for now accepts null since GUI doesn't exist
 
-    /**
-     * Constructor - for now accepts null since GUI doesn't exist
-     */
     public MessageHandler(Object gui) {
         this.gui = gui;
         this.bubbles = new HashMap<>();

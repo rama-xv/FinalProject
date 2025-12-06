@@ -41,9 +41,8 @@ public class NetworkClient {
      *
      * Steps:
      * 1. Create Socket to server
-     * 2. Get output stream
-     * 3. Get input stream
-     * 4. Start listening thread (to receive messages continuously)
+     * 2. Get output stream $ input streams
+     * 3. Start listening thread (to receive messages continuously)
 
      * return true if connection successful, false otherwise
      */

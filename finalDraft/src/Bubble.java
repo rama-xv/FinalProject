@@ -16,9 +16,7 @@ public class Bubble {
     private String createdBy;
     private long timestamp;
 
-    // ============================================
     // CONSTRUCTORS
-    // ============================================
 
     /**
      * Full constructor with all properties
@@ -55,11 +53,7 @@ public class Bubble {
         this.timestamp = json.optLong("timestamp", System.currentTimeMillis());
     }
 
-
-    // ============================================
     // GETTERS
-    // ============================================
-
     public String getId() {
         return id;
     }
@@ -125,11 +119,7 @@ public class Bubble {
         this.y = y;
     }
 
-
-    // ============================================
     // JSON SERIALIZATION
-    // ============================================
-
     /**
      * Convert bubble to JSON string for sending over network
      * Creates a complete JSON object with all properties
@@ -175,11 +165,7 @@ public class Bubble {
         return json.toString();
     }
 
-
-    // ============================================
     // UTILITY METHODS
-    // ============================================
-
     /**
      * Check if a point (x, y) is inside this bubble
      * Useful for detecting clicks on the bubble
@@ -238,10 +224,7 @@ public class Bubble {
         return new Bubble(id, x, y, text, color, createdBy);
     }
 
-
-    // ============================================
     // OBJECT OVERRIDES
-    // ============================================
 
     @Override
     public String toString() {
@@ -263,10 +246,7 @@ public class Bubble {
         return id.hashCode();
     }
 
-
-    // ============================================
     // TESTING
-    // ============================================
 
     /**
      * Test the Bubble class independently

@@ -19,14 +19,8 @@ public class Connection {
     private String createdBy;           // Which client created this connection
     private long timestamp;             // When it was created
 
-
-    // ============================================
     // CONSTRUCTORS
-    // ============================================
-
-    /**
-     * Full constructor with all properties
-     */
+    //Full constructor with all properties
     public Connection(String fromBubbleId, String toBubbleId, String color) {
         this.fromBubbleId = fromBubbleId;
         this.toBubbleId = toBubbleId;
@@ -58,10 +52,8 @@ public class Connection {
         this.timestamp = json.optLong("timestamp", System.currentTimeMillis());
     }
 
-
-    // ============================================
     // GETTERS
-    // ============================================
+
 
     public String getFromBubbleId() {
         return fromBubbleId;
@@ -90,11 +82,7 @@ public class Connection {
     public long getTimestamp() {
         return timestamp;
     }
-
-
-    // ============================================
     // SETTERS
-    // ============================================
 
     public void setColor(String color) {
         this.color = color;
@@ -107,11 +95,7 @@ public class Connection {
     public void setDirected(boolean directed) {
         this.isDirected = directed;
     }
-
-
-    // ============================================
     // JSON SERIALIZATION
-    // ============================================
 
     /**
      * Convert connection to JSON string for sending over network
@@ -142,10 +126,7 @@ public class Connection {
         return json.toString();
     }
 
-
-    // ============================================
     // UTILITY METHODS
-    // ============================================
 
     /**
      * Check if this connection involves a specific bubble
@@ -224,11 +205,7 @@ public class Connection {
                         this.toBubbleId.equals(other.fromBubbleId));
     }
 
-
-    // ============================================
     // OBJECT OVERRIDES
-    // ============================================
-
     @Override
     public String toString() {
         String arrow = isDirected ? "→" : "—";
@@ -253,10 +230,7 @@ public class Connection {
     }
 
 
-    // ============================================
     // TESTING
-    // ============================================
-
     /**
      * Test the Connection class independently
      */
