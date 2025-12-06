@@ -38,12 +38,7 @@ public class MessageHandler {
     public void setNetworkClient(NetworkClient client) {
         this.client = client;
     }
-
-
-    // ============================================
     // INCOMING MESSAGE PROCESSING
-    // ============================================
-
     public void handleIncomingMessage(String jsonMessage) {
         try {
             JSONObject json = new JSONObject(jsonMessage);
@@ -218,10 +213,7 @@ public class MessageHandler {
         }
     }
 
-
-    // ============================================
     // OUTGOING ACTIONS
-    // ============================================
 
     public void createBubble(double x, double y, String text) {
         String id = generateBubbleId();
@@ -305,12 +297,7 @@ public class MessageHandler {
 
         sendToServer(json);
     }
-
-
-    // ============================================
     // UTILITY METHODS
-    // ============================================
-
     private void sendToServer(JSONObject json) {
         if (client != null && client.isConnected()) {
             client.sendMessage(json.toString());
@@ -338,11 +325,7 @@ public class MessageHandler {
     public Bubble getBubble(String id) {
         return bubbles.get(id);
     }
-
-
-    // ============================================
     // TESTING
-    // ============================================
 
     public static void main(String[] args) {
         System.out.println("=== MessageHandler Test ===\n");
@@ -359,6 +342,6 @@ public class MessageHandler {
         handler.createBubble(300, 400, "Another bubble");
         System.out.println("Total bubbles after create: " + handler.getAllBubbles().size());
 
-        System.out.println("\n✓ MessageHandler working correctly!");
+        System.out.println("\n MessageHandler working correctly!");
     }
 }
