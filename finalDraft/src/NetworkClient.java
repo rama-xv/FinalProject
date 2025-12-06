@@ -14,7 +14,7 @@ public class NetworkClient {
     private Socket socket;//Socket - the actual network connection to the server.
     private PrintWriter out;    //PrintWriter - used to SEND text messages to the server(It writes to the socket's output stream.)
     private BufferedReader in;    //BufferedReader - used to RECEIVE text messages from the server(It reads from the socket's input stream.)
-    private String serverAddress;    //The server's address (IP or hostname).
+    private String serverAddress;    //The server's address
     private int serverPort;    //The port number the server is listening on(Must match the port Person 1's server uses)
     private MessageHandler messageHandler;    //processes incoming messages from the server, then pass it to this handler.
     private boolean isConnected;    //Flag to track if we're currently connected to the server.
@@ -258,7 +258,7 @@ public class NetworkClient {
      * test client before the GUI is ready!
      */
     public static void main(String[] args) {
-        System.out.println("NetworkClient Test:");
+        System.out.println("=== NetworkClient Test ===");
 
         // Create a simple test message handler
         MessageHandler testHandler = new MessageHandler(null) {
@@ -269,15 +269,34 @@ public class NetworkClient {
         };
 
         // Create the client
-        //match Person 1's server!
         NetworkClient client = new NetworkClient("localhost", 8080, testHandler);
 
         // Try to connect
         if (client.connect()) {
             System.out.println("Connection successful! Ready to send messages.");
 
-            // Send a test message
-            client.sendMessage("{Hello from client!}");
+            // Wait a moment for initial messages
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                // ignore
+            }
+
+            // Send a VALID test message using JSON
+            try {
+                org.json.JSONObject testMsg = new org.json.JSONObject();
+                testMsg.put("type", "bubble_create");
+                testMsg.put("id", "test_bubble_1");
+                testMsg.put("x", 100.0);
+                testMsg.put("y", 200.0);
+                testMsg.put("text", "Test from NetworkClient!");
+                testMsg.put("color", "#FF5733");
+
+                client.sendMessage(testMsg.toString());
+
+            } catch (Exception e) {
+                System.err.println("Error creating test message: " + e.getMessage());
+            }
 
             // Keep the program running to receive messages
             System.out.println("Listening for messages... Press Ctrl+C to exit");
@@ -286,6 +305,7 @@ public class NetworkClient {
             } catch (InterruptedException e) {
                 System.out.println("Test interrupted");
             }
+
             // Disconnect when done
             client.disconnect();
 

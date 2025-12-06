@@ -1,26 +1,25 @@
 import org.json.JSONObject;
-/**
- * Bubble.java
- * Represents a single idea bubble on the canvas.
- * Contains position, text, visual properties, and metadata.
- */
+
 public class Bubble {
 
     // Identity
-    private String id;                  // Unique identifier
+    private String id;
     // Position
-    private double x;                   // X coordinate on canvas
-    private double y;                   // Y coordinate on canvas
+    private double x;
+    private double y;
     // Content
-    private String text;                // The actual idea/text in the bubble
+    private String text;
     // Visual properties
-    private String color;               // Hex color code
-    private double radius;              // Bubble size
+    private String color;
+    private double radius;
     // Metadata
-    private String createdBy;           // Which client created this bubble
-    private long timestamp;             // When it was created
+    private String createdBy;
+    private long timestamp;
 
+    // ============================================
     // CONSTRUCTORS
+    // ============================================
+
     /**
      * Full constructor with all properties
      */
@@ -31,7 +30,7 @@ public class Bubble {
         this.text = text;
         this.color = color;
         this.createdBy = createdBy;
-        this.radius = 50.0;  // Default size
+        this.radius = 50.0;
         this.timestamp = System.currentTimeMillis();
     }
 

@@ -116,7 +116,6 @@ public class MessageHandler {
             if (json.has("x")) bubble.setX(json.getDouble("x"));
             if (json.has("y")) bubble.setY(json.getDouble("y"));
             if (json.has("text")) bubble.setText(json.getString("text"));
-
             // GUI update removed temporarily
             System.out.println("Updated bubble: " + id);
 

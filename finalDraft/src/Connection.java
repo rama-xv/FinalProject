@@ -19,9 +19,15 @@ public class Connection {
     private String createdBy;           // Which client created this connection
     private long timestamp;             // When it was created
 
+
+    // ============================================
     // CONSTRUCTORS
-    public Connection(String fromBubbleId, String toBubbleId, String color,
-                      double thickness, boolean isDirected, String createdBy) {
+    // ============================================
+
+    /**
+     * Full constructor with all properties
+     */
+    public Connection(String fromBubbleId, String toBubbleId, String color) {
         this.fromBubbleId = fromBubbleId;
         this.toBubbleId = toBubbleId;
         this.color = color;
@@ -31,10 +37,17 @@ public class Connection {
         this.timestamp = System.currentTimeMillis();
     }
 
-//constructors
+    /**
+     * Simple constructor with defaults
+     * Default: black line, 2px thick, directed (with arrow)
+     */
     public Connection(String fromBubbleId, String toBubbleId) {
-        this(fromBubbleId, toBubbleId, "#000000", 2.0, true, "unknown");
+        this(fromBubbleId, toBubbleId, "#000000");
     }
+
+    /**
+     * Constructor from JSON object (for deserializing from server)
+     */
     public Connection(JSONObject json) {
         this.fromBubbleId = json.getString("from");
         this.toBubbleId = json.getString("to");
@@ -44,7 +57,12 @@ public class Connection {
         this.createdBy = json.optString("createdBy", "unknown");
         this.timestamp = json.optLong("timestamp", System.currentTimeMillis());
     }
+
+
+    // ============================================
     // GETTERS
+    // ============================================
+
     public String getFromBubbleId() {
         return fromBubbleId;
     }
@@ -72,7 +90,11 @@ public class Connection {
     public long getTimestamp() {
         return timestamp;
     }
+
+
+    // ============================================
     // SETTERS
+    // ============================================
 
     public void setColor(String color) {
         this.color = color;
@@ -86,7 +108,11 @@ public class Connection {
         this.isDirected = directed;
     }
 
+
+    // ============================================
     // JSON SERIALIZATION
+    // ============================================
+
     /**
      * Convert connection to JSON string for sending over network
      */
@@ -115,7 +141,12 @@ public class Connection {
 
         return json.toString();
     }
+
+
+    // ============================================
     // UTILITY METHODS
+    // ============================================
+
     /**
      * Check if this connection involves a specific bubble
      * Useful for finding all connections when deleting a bubble
@@ -165,14 +196,14 @@ public class Connection {
      * Create a reversed copy of this connection
      */
     public Connection reversed() {
-        return new Connection(toBubbleId, fromBubbleId, color, thickness, isDirected, createdBy);
+        return new Connection(toBubbleId, fromBubbleId, color);
     }
 
     /**
      * Create a copy of this connection
      */
     public Connection copy() {
-        return new Connection(fromBubbleId, toBubbleId, color, thickness, isDirected, createdBy);
+        return new Connection(fromBubbleId, toBubbleId, color);
     }
 
     /**
@@ -192,7 +223,11 @@ public class Connection {
                 (this.fromBubbleId.equals(other.toBubbleId) &&
                         this.toBubbleId.equals(other.fromBubbleId));
     }
+
+
+    // ============================================
     // OBJECT OVERRIDES
+    // ============================================
 
     @Override
     public String toString() {
@@ -217,8 +252,14 @@ public class Connection {
         return fromBubbleId.hashCode() * 31 + toBubbleId.hashCode();
     }
 
+
+    // ============================================
     // TESTING
-    //Test the Connection class independently
+    // ============================================
+
+    /**
+     * Test the Connection class independently
+     */
     public static void main(String[] args) {
         System.out.println("=== Connection Class Test ===\n");
 
@@ -260,7 +301,7 @@ public class Connection {
 
         // Test 8: Styled connection
         Connection styledConn = new Connection(
-                "bubble1", "bubble2", "#FF5733", 3.5, false, "client1"
+                "bubble1", "bubble2", "#FF5733"
         );
         System.out.println("\nStyled connection: " + styledConn);
         System.out.println("JSON: " + styledConn.toJSON());
