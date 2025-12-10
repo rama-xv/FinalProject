@@ -94,7 +94,7 @@ public class ClientHandler implements Runnable {
         server.getCanvasState().addBubble(bubble);
 
         // Broadcast to all other clients
-        server.broadcast(json.toString(), this);
+        server.broadcastToAll(json.toString());
     }
 
     private void handleBubbleUpdate(JSONObject json) {
@@ -106,7 +106,7 @@ public class ClientHandler implements Runnable {
         server.getCanvasState().updateBubble(id, text, x, y);
 
         // Broadcast to all other clients
-        server.broadcast(json.toString(), this);
+        server.broadcastToAll(json.toString());
     }
 
     private void handleBubbleDelete(JSONObject json) {
@@ -114,7 +114,7 @@ public class ClientHandler implements Runnable {
         server.getCanvasState().deleteBubble(id);
 
         // Broadcast to all other clients
-        server.broadcast(json.toString(), this);
+        server.broadcastToAll(json.toString());
     }
 
     private void handleConnectionCreate(JSONObject json) {
@@ -125,7 +125,7 @@ public class ClientHandler implements Runnable {
         server.getCanvasState().addConnection(connection);
 
         // Broadcast to all other clients
-        server.broadcast(json.toString(), this);
+        server.broadcastToAll(json.toString());
     }
 
     private void handleConnectionDelete(JSONObject json) {
@@ -135,7 +135,7 @@ public class ClientHandler implements Runnable {
         server.getCanvasState().deleteConnection(from, to);
 
         // Broadcast to all other clients
-        server.broadcast(json.toString(), this);
+        server.broadcastToAll(json.toString());
     }
 
     public void sendMessage(String message) {
