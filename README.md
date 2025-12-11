@@ -8,6 +8,17 @@ BrainStorm Bubble is a real time mind mapping app where teams can brainstorm tog
 - Rama Ibseileh worked on Server & Network Protocol. 
 - Amal Hammoud worked on Client Networking & Data Management.
 - Amina Bilal worked on GUI & User Interface.
+
+# Final Project Rubric
+
+| Criteria | Full Marks | No Marks | My Score | Total Points |
+|----------|------------|----------|----------|--------------|
+| Server process creates and listens for network conections | 10 pts | 0 pts | 10 pts | 10 / 10 pts |
+| Client application connects to the network server to commnicate | 10 pts | 0 pts | 10 pts | 10 / 10 pts |
+| Client application javafx interface | 10 pts | 0 pts | 10 pts | 10 / 10 pts |
+| Team eval ( average score is OK ) | 10 pts | 0 pts | 10 pts | 10 / 10 pts |
+
+**My Total Score: 40 / 40 pts**
   
 # Resources 
 - A Guide to Java Sockets
