@@ -36,14 +36,12 @@ public class NetworkClient {
 
 
     /*Connection Methods:
-     * Connects to the BrainStorm server.
+     * Connects to the BrainStorm server:
      * This creates the Socket and sets up input/output streams.
-     *
      * Steps:
      * 1. Create Socket to server
-     * 2. Get output stream $ input streams
+     * 2. Get output stream & input streams
      * 3. Start listening thread (to receive messages continuously)
-
      * return true if connection successful, false otherwise
      */
     public boolean connect() {
@@ -87,10 +85,9 @@ public class NetworkClient {
         try {
             // Mark as disconnected first (stops the listener thread)
             isConnected = false;
-
             System.out.println("Disconnecting from server...");
 
-            // Close the streams and socket, close streams before socket
+            // Close the streams and socket( close streams before socket)
             if (out != null) {
                 out.close();
             }
@@ -100,7 +97,6 @@ public class NetworkClient {
             if (socket != null && !socket.isClosed()) {
                 socket.close();
             }
-
             System.out.println("Disconnected successfully");
 
         } catch (IOException e) {
@@ -111,7 +107,6 @@ public class NetworkClient {
     /*
      * Attempts to reconnect to the server.
      * Useful if connection is lost unexpectedly.
-     *
      * @param maxAttempts How many times to try reconnecting
      * @return true if reconnection successful, false otherwise
      */
@@ -127,7 +122,6 @@ public class NetworkClient {
                 System.out.println("Reconnected successfully!");
                 return true;
             }
-
             // If not last attempt, wait before trying again
             if (attempt < maxAttempts) {
                 try {
@@ -148,7 +142,6 @@ public class NetworkClient {
     /**
      * Sends a message to the server.
      * The message should be in JSON format (created by your data models).
-     *
      * @param message The message to send
      * @return true if sent successfully, false if not connected
      */
@@ -185,9 +178,9 @@ public class NetworkClient {
     /**
      * Starts a background thread that continuously listens for messages from the server.
      * The thread runs this logic in a loop:
-     * 1. Wait for message from server
-     * 2. When message arrives, pass it to MessageHandler
-     * 3. Repeat until disconnected
+          1. Wait for message from server
+          2. When message arrives, pass it to MessageHandler
+          3. Repeat until disconnected
      */
     private void startListening() {
         // Create a new thread for listening
@@ -197,13 +190,11 @@ public class NetworkClient {
                 String message;
                 // Keep reading messages while connected
                 while (isConnected && (message = in.readLine()) != null) {
-
                     System.out.println("Received from server: " + message);
 
                     // Pass the message to the handler for processing to parse it and update the GUI
                     if (messageHandler != null)
                         messageHandler.handleIncomingMessage(message);
-
                 }
                 // If we get here, connection was lost
                 System.out.println("Connection to server lost");
@@ -220,44 +211,35 @@ public class NetworkClient {
                 }
             }
         });
-
         // Mark thread as daemon (it will stop when main program stops)
         listenerThread.setDaemon(true);
         // Start the thread running
         listenerThread.start();
     }
-    // UTILITY METHODS
-    /**
-     * Checks if currently connected to server.
-     * @return true if connected, false otherwise
-     */
+    // UTILITY METHODS:
+
+    //Checks if currently connected to server.
+     //@return true if connected, false otherwise
     public boolean isConnected() {
+
         return isConnected && socket != null && !socket.isClosed();
     }
-
-    /**
-     * Gets the server address this client is configured to connect to.
-     * @return server address as string
-     */
+    //Gets the server address this client is configured to connect to.
+     // @return server address as string
     public String getServerAddress() {
         return serverAddress;
     }
+    // Gets the server port this client is configured to connect to.
+     // @return server port number
 
-    /**
-     * Gets the server port this client is configured to connect to.
-     * @return server port number
-     */
     public int getServerPort() {
         return serverPort;
     }
 
-    // MAIN METHOD (FOR TESTING)
-    /**
-     * Main method for testing the NetworkClient independently.
-     * test client before the GUI is ready!
-     */
-    public static void main(String[] args) {
-        System.out.println("=== NetworkClient Test ===");
+    // MAIN METHOD (FOR TESTING the NetworkClient independently)
+
+    public static void main(String[] args) throws InterruptedException {
+        System.out.println("NetworkClient Test :");
 
         // Create a simple test message handler
         MessageHandler testHandler = new MessageHandler(null) {
@@ -266,7 +248,6 @@ public class NetworkClient {
                 System.out.println("TEST HANDLER: Received message: " + message);
             }
         };
-
         // Create the client
         NetworkClient client = new NetworkClient("localhost", 8080, testHandler);
 
@@ -275,11 +256,7 @@ public class NetworkClient {
             System.out.println("Connection successful! Ready to send messages.");
 
             // Wait a moment for initial messages
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                // ignore
-            }
+            Thread.sleep(1000);
 
             // Send a VALID test message using JSON
             try {
@@ -290,7 +267,6 @@ public class NetworkClient {
                 testMsg.put("y", 200.0);
                 testMsg.put("text", "Test from NetworkClient!");
                 testMsg.put("color", "#FF5733");
-
                 client.sendMessage(testMsg.toString());
 
             } catch (Exception e) {
@@ -307,7 +283,6 @@ public class NetworkClient {
 
             // Disconnect when done
             client.disconnect();
-
         } else {
             System.err.println("Connection failed. Check that the server is running!");
         }
