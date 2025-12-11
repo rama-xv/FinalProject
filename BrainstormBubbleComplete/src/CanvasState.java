@@ -7,10 +7,19 @@ import java.util.concurrent.ConcurrentHashMap;
 public class CanvasState {
     private Map<String, Bubble> bubbles;
     private Map<String, Connection> connections;
+    private String mainIdea = "Main Idea";
 
     public CanvasState() {
         this.bubbles = new ConcurrentHashMap<>();
         this.connections = new ConcurrentHashMap<>();
+    }
+
+    public synchronized void setMainIdea(String mainIdea) {
+        this.mainIdea = mainIdea;
+    }
+
+    public synchronized String getMainIdea() {
+        return mainIdea;
     }
 
     // Bubble methods
@@ -86,6 +95,8 @@ public class CanvasState {
             connectionsArray.put(new JSONObject(connection.toJSON()));
         }
         json.put("connections", connectionsArray);
+
+        json.put("mainIdea", mainIdea);
 
         return json;
     }

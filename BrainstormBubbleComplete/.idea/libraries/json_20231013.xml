@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="json-20231013">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/lib/json-20231013.jar!/" />
+      <root url="file://$PROJECT_DIR$/javafx-sdk-21.0.1/lib" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+    <jarDirectory url="file://$PROJECT_DIR$/javafx-sdk-21.0.1/lib" recursive="false" />
+  </library>
+</component>

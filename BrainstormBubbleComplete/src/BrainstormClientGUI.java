@@ -89,6 +89,11 @@ public class BrainstormClientGUI extends Application {
             nextBubbleIdForLayout = 1;
 
             createCenterBubble();
+
+            // Send clear command to server
+            if (networkClient != null && networkClient.isConnected() && messageHandler != null) {
+                messageHandler.clearAll();
+            }
         });
 
         // main idea/bubble
@@ -113,6 +118,11 @@ public class BrainstormClientGUI extends Application {
                         centerLabel.setX(-textWidth / 2);
                         centerLabel.setY(textHeight / 4);
                     }
+
+                    // Send main idea update to server
+                    if (networkClient != null && networkClient.isConnected() && messageHandler != null) {
+                        messageHandler.updateMainIdea(trimmed);
+                    }
                 }
             });
         });
@@ -131,12 +141,12 @@ public class BrainstormClientGUI extends Application {
                 String trimmed = text.trim();
                 if (!trimmed.isEmpty()) {
 
-                    // Positioning new bubbles equally
-                    int layoutId = nextBubbleIdForLayout++;
+                    // Positioning new bubbles based on current bubble count
+                    int currentBubbleCount = bubbleMap.size();
                     double radius = 200; // distance from center
-                    int slots = 6;       // maximum sub-ideas around main idea
+                    int slots = 12;       // maximum sub-ideas around main idea
 
-                    double angleDegrees = (layoutId - 1) * (360.0 / slots);
+                    double angleDegrees = currentBubbleCount * (360.0 / slots);
                     double angleRadians = Math.toRadians(angleDegrees);
 
                     double x = centerX + radius * Math.cos(angleRadians);
@@ -149,7 +159,7 @@ public class BrainstormClientGUI extends Application {
                     } else {
 
                         // When no network involved
-                        String localId = "local_" + layoutId;
+                        String localId = "local_" + System.currentTimeMillis();
                         createIdeaBubbleOnCanvas(localId, x, y, trimmed);
                     }
                 }
@@ -358,6 +368,17 @@ public class BrainstormClientGUI extends Application {
         bubbleMap.clear();
         nextBubbleIdForLayout = 1;
         createCenterBubble();
+    }
+
+    public void onMainIdeaUpdated(String newMainIdea) {
+        mainIdeaText = newMainIdea;
+        if (centerLabel != null) {
+            centerLabel.setText(mainIdeaText);
+            double textWidth = centerLabel.getLayoutBounds().getWidth();
+            double textHeight = centerLabel.getLayoutBounds().getHeight();
+            centerLabel.setX(-textWidth / 2);
+            centerLabel.setY(textHeight / 4);
+        }
     }
 
 

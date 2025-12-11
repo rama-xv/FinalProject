@@ -73,6 +73,12 @@ public class ClientHandler implements Runnable {
                 case "connection_delete":
                     handleConnectionDelete(json);
                     break;
+                case "main_idea_update":
+                    handleMainIdeaUpdate(json);
+                    break;
+                case "clear_all":
+                    handleClearAll(json);
+                    break;
                 default:
                     System.err.println("Unknown message type: " + type);
             }
@@ -93,8 +99,11 @@ public class ClientHandler implements Runnable {
         Bubble bubble = new Bubble(id, x, y, text, color, createdBy);
         server.getCanvasState().addBubble(bubble);
 
-        // Broadcast to all other clients
-        server.broadcastToAll(json.toString());
+        // Notify server GUI
+        server.notifyBubbleCreated(bubble);
+
+        // Broadcast to all clients except the sender
+        server.broadcast(json.toString(), this);
     }
 
     private void handleBubbleUpdate(JSONObject json) {
@@ -105,16 +114,25 @@ public class ClientHandler implements Runnable {
 
         server.getCanvasState().updateBubble(id, text, x, y);
 
-        // Broadcast to all other clients
-        server.broadcastToAll(json.toString());
+        // Notify server GUI
+        Bubble bubble = server.getCanvasState().getBubble(id);
+        if (bubble != null) {
+            server.notifyBubbleUpdated(bubble);
+        }
+
+        // Broadcast to all clients except the sender
+        server.broadcast(json.toString(), this);
     }
 
     private void handleBubbleDelete(JSONObject json) {
         String id = json.getString("id");
         server.getCanvasState().deleteBubble(id);
 
-        // Broadcast to all other clients
-        server.broadcastToAll(json.toString());
+        // Notify server GUI
+        server.notifyBubbleDeleted(id);
+
+        // Broadcast to all clients except the sender
+        server.broadcast(json.toString(), this);
     }
 
     private void handleConnectionCreate(JSONObject json) {
@@ -124,8 +142,8 @@ public class ClientHandler implements Runnable {
         Connection connection = new Connection(from, to);
         server.getCanvasState().addConnection(connection);
 
-        // Broadcast to all other clients
-        server.broadcastToAll(json.toString());
+        // Broadcast to all clients except the sender
+        server.broadcast(json.toString(), this);
     }
 
     private void handleConnectionDelete(JSONObject json) {
@@ -134,8 +152,32 @@ public class ClientHandler implements Runnable {
 
         server.getCanvasState().deleteConnection(from, to);
 
-        // Broadcast to all other clients
-        server.broadcastToAll(json.toString());
+        // Broadcast to all clients except the sender
+        server.broadcast(json.toString(), this);
+    }
+
+    private void handleMainIdeaUpdate(JSONObject json) {
+        String text = json.getString("text");
+
+        // Store in server's canvas state
+        server.getCanvasState().setMainIdea(text);
+
+        // Notify server GUI
+        server.notifyMainIdeaUpdated(text);
+
+        // Broadcast to all clients except the sender
+        server.broadcast(json.toString(), this);
+    }
+
+    private void handleClearAll(JSONObject json) {
+        // Clear server's canvas state
+        server.clearAllBubbles();
+
+        // Notify server GUI
+        server.notifyClearAll();
+
+        // Broadcast to all clients except the sender
+        server.broadcast(json.toString(), this);
     }
 
     public void sendMessage(String message) {

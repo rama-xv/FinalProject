@@ -63,6 +63,12 @@ public class MessageHandler {
                 case "initial_state":
                     handleInitialState(json);
                     break;
+                case "main_idea_update":
+                    handleMainIdeaUpdate(json);
+                    break;
+                case "clear_all":
+                    handleClearAll();
+                    break;
                 default:
                     System.out.println("Unknown message type: " + type);
             }
@@ -225,11 +231,45 @@ public class MessageHandler {
                 }
             }
 
+            // Handle main idea if present
+            if (json.has("mainIdea")) {
+                String mainIdea = json.getString("mainIdea");
+                if (gui instanceof BrainstormClientGUI) {
+                    BrainstormClientGUI realGui = (BrainstormClientGUI) gui;
+                    Platform.runLater(() -> realGui.onMainIdeaUpdated(mainIdea));
+                }
+            }
+
             System.out.println("Loaded initial state: " + bubbles.size() +
                     " bubbles, " + connections.size() + " connections");
 
         } catch (JSONException e) {
             System.err.println("ERROR: Invalid initial_state message format");
+        }
+    }
+
+    private void handleMainIdeaUpdate(JSONObject json) {
+        try {
+            String mainIdea = json.getString("text");
+            System.out.println("Main idea updated: " + mainIdea);
+
+            if (gui instanceof BrainstormClientGUI) {
+                BrainstormClientGUI realGui = (BrainstormClientGUI) gui;
+                Platform.runLater(() -> realGui.onMainIdeaUpdated(mainIdea));
+            }
+        } catch (JSONException e) {
+            System.err.println("ERROR: Invalid main_idea_update message format");
+        }
+    }
+
+    private void handleClearAll() {
+        bubbles.clear();
+        connections.clear();
+        System.out.println("Clear all received from server");
+
+        if (gui instanceof BrainstormClientGUI) {
+            BrainstormClientGUI realGui = (BrainstormClientGUI) gui;
+            Platform.runLater(realGui::onNetworkResetAllBubbles);
         }
     }
 
@@ -241,6 +281,12 @@ public class MessageHandler {
 
         Bubble bubble = new Bubble(id, x, y, text, color, clientId);
         bubbles.put(id, bubble);
+
+        // Show bubble on this client immediately
+        if (gui instanceof BrainstormClientGUI) {
+            BrainstormClientGUI realGui = (BrainstormClientGUI) gui;
+            Platform.runLater(() -> realGui.onNetworkBubbleCreated(bubble));
+        }
 
         JSONObject json = new JSONObject();
         json.put("type", "bubble_create");
@@ -314,6 +360,24 @@ public class MessageHandler {
         json.put("type", "connection_delete");
         json.put("from", fromId);
         json.put("to", toId);
+
+        sendToServer(json);
+    }
+
+    public void updateMainIdea(String text) {
+        JSONObject json = new JSONObject();
+        json.put("type", "main_idea_update");
+        json.put("text", text);
+
+        sendToServer(json);
+    }
+
+    public void clearAll() {
+        bubbles.clear();
+        connections.clear();
+
+        JSONObject json = new JSONObject();
+        json.put("type", "clear_all");
 
         sendToServer(json);
     }
