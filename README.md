@@ -1,7 +1,7 @@
 # FinalProject
 
 # Overview
-BrainStorm Bubble is a real-time mind mapping app where teams can brainstorm together on a shared canvas. You can create idea bubbles, connect them with lines, and move things around - and when one person makes a change, everyone else sees it happen instantly. It's basically Google Docs but for visual brainstorming.
+BrainStorm Bubble is a real time mind mapping app where teams can brainstorm together on a shared canvas. You can create idea bubbles, connect them with lines, and move things around and when one person makes a change, everyone else sees it happen instantly. It's basically Google Docs but for visual brainstorming.
 
 # Team Members and Contributions
 - Rama Ibseileh, Amal Hammoud, and Amina Bilal Worked on this project together.
