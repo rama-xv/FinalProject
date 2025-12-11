@@ -19,16 +19,7 @@ BrainStorm Bubble is a real time mind mapping app where teams can brainstorm tog
 - We used AI assistance during this project to learn new concepts and to help debug issues, including fixing errors related to server client communication.
 
 # Group Evaluation 
--Rama Ibseileh Evalutaion:
-- QUALITY OF WORK: RI: 5, AH: 5, AB: 5
-- PROBLEM SOLVING SKILLS: RI: 5, AH: 5, AB: 5
-- TEAMWORK: RI: 5, AH: 5, AB: 5
-- INITIATIVE: RI: 5, AH: 5, AB: 5
-- COMMUNICATION: RI: 5, AH: 5, AB: 5
-- TIME MANAGEMENT: RI: 5, AH: 5, AB: 5
-
-
-
+All group member evaluations can be found in a file within the repository.
 
 ## Screen Shots ## 
 **Screen Shot for the server:**
