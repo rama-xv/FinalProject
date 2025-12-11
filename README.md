@@ -49,6 +49,8 @@ All group member evaluations can be found in a file within the repository.
 <img width="1354" height="952" alt="image" src="https://github.com/user-attachments/assets/a54511c1-1ecf-499d-aafd-40cae73c4913" />
 <img width="1347" height="943" alt="image" src="https://github.com/user-attachments/assets/1c2ef905-4b16-47d2-8238-9286850ca168" />
 <img width="1335" height="933" alt="image" src="https://github.com/user-attachments/assets/790659ed-a30c-441d-acb6-d8909d9d4d81" />
+**Screen Shot for testing the connection between server and client before creating GUI:**
+<img width="1897" height="995" alt="Screenshot 2025-12-11 132246" src="https://github.com/user-attachments/assets/486cb5c0-9d40-41f2-b05e-e8fc7b9f7c5e" />
 
 
 
