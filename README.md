@@ -10,22 +10,22 @@ BrainStorm Bubble is a real-time mind mapping app where teams can brainstorm tog
 - Amina Bilal worked on GUI & User Interface.
   
 # Resources 
--A Guide to Java Sockets
--Thread safe java
--Ports in java
--https://www.youtube.com/playlist?list=PL6gx4Cwl9DGBzfXLWLSYVy8EbTdpGbUIG
--https://www.youtube.com/watch?v=g8qeaEd2jTc
--https://www.youtube.com/watch?v=m2pOLhSsV70
--We used AI assistance during this project to learn new concepts and to help debug issues, including fixing errors related to server client communication.
+- A Guide to Java Sockets
+- Thread safe java
+- Ports in java
+- https://www.youtube.com/playlist?list=PL6gx4Cwl9DGBzfXLWLSYVy8EbTdpGbUIG
+- https://www.youtube.com/watch?v=g8qeaEd2jTc
+- https://www.youtube.com/watch?v=m2pOLhSsV70
+- We used AI assistance during this project to learn new concepts and to help debug issues, including fixing errors related to server client communication.
 
 # Group Evaluation 
 -Rama Ibseileh Evalutaion:
-QUALITY OF WORK: RI: 5, AH: 5, AB: 5
-PROBLEM SOLVING SKILLS: RI: 5, AH: 5, AB: 5
-TEAMWORK: RI: 5, AH: 5, AB: 5
-INITIATIVE: RI: 5, AH: 5, AB: 5
-COMMUNICATION: RI: 5, AH: 5, AB: 5
-TIME MANAGEMENT: RI: 5, AH: 5, AB: 5
+- QUALITY OF WORK: RI: 5, AH: 5, AB: 5
+- PROBLEM SOLVING SKILLS: RI: 5, AH: 5, AB: 5
+- TEAMWORK: RI: 5, AH: 5, AB: 5
+- INITIATIVE: RI: 5, AH: 5, AB: 5
+- COMMUNICATION: RI: 5, AH: 5, AB: 5
+- TIME MANAGEMENT: RI: 5, AH: 5, AB: 5
 
 
 
