@@ -5,7 +5,7 @@ import java.net.*;
  * NetworkClient.java:Manages the connection between this client and the BrainStorm server.
  * Responsibilities:
  * 1. Connect to server using Socket
- * 2. Send messages to server (bubble creation, updates, etc.)
+ * 2. Send json messages to server (bubble creation, updates, etc.)
  * 3. Listen for incoming messages from server (in background thread)
  * 4. Handle disconnection and reconnection
  */
@@ -33,8 +33,6 @@ public class NetworkClient {
         this.messageHandler = messageHandler;
         this.isConnected = false;
     }
-
-
     /*Connection Methods:
      * Connects to the BrainStorm server.
      * This creates the Socket and sets up input/output streams.

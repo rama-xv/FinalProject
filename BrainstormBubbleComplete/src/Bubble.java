@@ -86,10 +86,7 @@ public class Bubble {
         return timestamp;
     }
 
-
-    // ============================================
     // SETTERS
-    // ============================================
 
     public void setX(double x) {
         this.x = x;

@@ -5,105 +5,141 @@ import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.Group;
 import javafx.scene.Node;
-import javafx.scene.control.Button;
-import javafx.scene.control.TextInputDialog;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Pane;
+import javafx.scene.control.*;
+import javafx.scene.effect.DropShadow;
+import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
+import javafx.animation.ScaleTransition;
+import javafx.util.Duration;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-// Bubble brainstorm system with main idea bubble and multiple sub-bubbles
-
+/**
+ * BrainStorm Bubble - Enhanced GUI with Colors
+ */
 public class BrainstormClientGUI extends Application {
 
-    private Pane canvas; // space for our bubble diagram
-    private int nextBubbleIdForLayout = 1;
+    private Pane canvas;
     private final Map<String, BubbleData> bubbleMap = new HashMap<>();
-
 
     private Group centerBubbleGroup;
     private Text centerLabel;
-    private final double centerX = 450; // assumed center coordinates
+    private final double centerX = 450;
     private final double centerY = 300;
 
-
-    private String mainIdeaText = "Main Idea"; // default main bubble text
+    private String mainIdeaText = "Main Idea";
     private NetworkClient networkClient;
     private MessageHandler messageHandler;
 
-    private static class BubbleData { // holds individual data for each bubble/idea
+    private Label statusLabel;
+
+    // Color palette for bubbles
+    private final Color[] BUBBLE_COLORS = {
+            Color.web("#FF6B6B"), // Coral Red
+            Color.web("#4ECDC4"), // Turquoise
+            Color.web("#45B7D1"), // Sky Blue
+            Color.web("#FFA07A"), // Light Salmon
+            Color.web("#98D8C8"), // Mint
+            Color.web("#F7DC6F"), // Yellow
+            Color.web("#BB8FCE"), // Lavender
+            Color.web("#85C1E2")  // Baby Blue
+    };
+    private int colorIndex = 0;
+
+    private static class BubbleData {
         String id;
         double x;
         double y;
         String text;
+        Color color;
         Group view;
         Line line;
 
-        BubbleData(String id, double x, double y, String text, Group view, Line line) {
+        BubbleData(String id, double x, double y, String text, Color color, Group view, Line line) {
             this.id = id;
             this.x = x;
             this.y = y;
             this.text = text;
+            this.color = color;
             this.view = view;
             this.line = line;
         }
     }
 
-     // Creating Canvas size
     @Override
-    public void start(Stage primaryStage) { // building UI
+    public void start(Stage primaryStage) {
         BorderPane root = new BorderPane();
+        root.setStyle("-fx-background-color: #f5f7fa;");
 
+        // Canvas
         canvas = new Pane();
-        canvas.setPrefSize(900, 600); // assumed size
+        canvas.setPrefSize(900, 600);
+        canvas.setStyle("-fx-background-color: white; -fx-border-color: #e0e0e0; -fx-border-radius: 10;");
 
-        createCenterBubble(); // builds main bubble
+        // Add some padding around canvas
+        StackPane canvasWrapper = new StackPane(canvas);
+        canvasWrapper.setPadding(new Insets(20));
 
-        HBox topBar = new HBox(10); // bar for buttons
-        topBar.setPadding(new Insets(10));
+        createCenterBubble();
+
+        // Top toolbar with better styling
+        HBox topBar = new HBox(15);
+        topBar.setPadding(new Insets(15));
         topBar.setAlignment(Pos.CENTER_LEFT);
+        topBar.setStyle("-fx-background-color: #667eea; -fx-background-radius: 0 0 10 10;");
 
-        Button connectButton   = new Button("Connect");
-        Button mainIdeaButton  = new Button("Set Main Idea");
-        Button addBubbleButton = new Button("Add Bubble");
-        Button clearButton     = new Button("Clear");
+        Button connectButton = createStyledButton("Connect", "#4CAF50");
+        Button mainIdeaButton = createStyledButton("Main Idea", "#2196F3");
+        Button addBubbleButton = createStyledButton("Add Bubble", "#FF9800");
+        Button clearButton = createStyledButton("Clear", "#F44336");
 
         topBar.getChildren().addAll(connectButton, mainIdeaButton, addBubbleButton, clearButton);
 
-        root.setTop(topBar);
-        root.setCenter(canvas);
+        // Status bar
+        HBox statusBar = new HBox(10);
+        statusBar.setPadding(new Insets(10));
+        statusBar.setAlignment(Pos.CENTER_LEFT);
+        statusBar.setStyle("-fx-background-color: #f0f0f0; -fx-border-color: #d0d0d0; -fx-border-width: 1 0 0 0;");
 
-        // Clear Button
+        Circle statusCircle = new Circle(6);
+        statusCircle.setFill(Color.RED);
+
+        statusLabel = new Label("Disconnected");
+        statusLabel.setFont(Font.font("Arial", 12));
+
+        statusBar.getChildren().addAll(statusCircle, statusLabel);
+
+        root.setTop(topBar);
+        root.setCenter(canvasWrapper);
+        root.setBottom(statusBar);
+
+        // Button Actions
         clearButton.setOnAction(event -> {
-            // Removes and resets canvas to default form
             canvas.getChildren().clear();
             bubbleMap.clear();
-            nextBubbleIdForLayout = 1;
-
+            colorIndex = 0;
             createCenterBubble();
 
-            // Send clear command to server
             if (networkClient != null && networkClient.isConnected() && messageHandler != null) {
                 messageHandler.clearAll();
             }
         });
 
-        // main idea/bubble
         mainIdeaButton.setOnAction(event -> {
             TextInputDialog dialog = new TextInputDialog(mainIdeaText);
             dialog.setTitle("Set Main Idea");
             dialog.setHeaderText("Enter the main idea for your brainstorm");
             dialog.setContentText("Main idea:");
 
-            Optional<String> result = dialog.showAndWait(); //edit text if user input given
+            Optional<String> result = dialog.showAndWait();
             result.ifPresent(text -> {
                 String trimmed = text.trim();
                 if (!trimmed.isEmpty()) {
@@ -111,15 +147,12 @@ public class BrainstormClientGUI extends Application {
 
                     if (centerLabel != null) {
                         centerLabel.setText(mainIdeaText);
-
-                        // Adjusting text label to fit in assumed center
                         double textWidth = centerLabel.getLayoutBounds().getWidth();
                         double textHeight = centerLabel.getLayoutBounds().getHeight();
                         centerLabel.setX(-textWidth / 2);
                         centerLabel.setY(textHeight / 4);
                     }
 
-                    // Send main idea update to server
                     if (networkClient != null && networkClient.isConnected() && messageHandler != null) {
                         messageHandler.updateMainIdea(trimmed);
                     }
@@ -127,24 +160,19 @@ public class BrainstormClientGUI extends Application {
             });
         });
 
-        //Add Bubble button
         addBubbleButton.setOnAction(event -> {
             TextInputDialog dialog = new TextInputDialog();
             dialog.setTitle("New Idea Bubble");
             dialog.setHeaderText("Create a new idea bubble");
-            dialog.setContentText("Enter your idea text:");
-            // user option to add sub-idea text (idea bubbles)
+            dialog.setContentText("Enter your idea:");
 
             Optional<String> result = dialog.showAndWait();
-
             result.ifPresent(text -> {
                 String trimmed = text.trim();
                 if (!trimmed.isEmpty()) {
-
-                    // Positioning new bubbles based on current bubble count
                     int currentBubbleCount = bubbleMap.size();
-                    double radius = 200; // distance from center
-                    int slots = 12;       // maximum sub-ideas around main idea
+                    double radius = 200;
+                    int slots = 12;
 
                     double angleDegrees = currentBubbleCount * (360.0 / slots);
                     double angleRadians = Math.toRadians(angleDegrees);
@@ -152,29 +180,24 @@ public class BrainstormClientGUI extends Application {
                     double x = centerX + radius * Math.cos(angleRadians);
                     double y = centerY + radius * Math.sin(angleRadians);
 
-                    // When connected to a server, MessageHandler works on creating bubble, if not then locally stored and produced.
                     if (networkClient != null && networkClient.isConnected() && messageHandler != null) {
-                        // Sending JSON to server
                         messageHandler.createBubble(x, y, trimmed);
                     } else {
-
-                        // When no network involved
                         String localId = "local_" + System.currentTimeMillis();
-                        createIdeaBubbleOnCanvas(localId, x, y, trimmed);
+                        Color bubbleColor = BUBBLE_COLORS[colorIndex % BUBBLE_COLORS.length];
+                        colorIndex++;
+                        createIdeaBubbleOnCanvas(localId, x, y, trimmed, bubbleColor);
                     }
                 }
             });
         });
 
-        // Connect button
         connectButton.setOnAction(event -> {
-
             if (networkClient != null && networkClient.isConnected()) {
-                System.out.println("You are already connected to server.");
+                System.out.println("Already connected.");
                 return;
             }
 
-           // Message handler work, connection attempts
             messageHandler = new MessageHandler(this);
             networkClient = new NetworkClient("localhost", 8080, messageHandler);
             messageHandler.setNetworkClient(networkClient);
@@ -182,56 +205,98 @@ public class BrainstormClientGUI extends Application {
             boolean ok = networkClient.connect();
             if (ok) {
                 System.out.println("Connected to server");
-
-
+                statusCircle.setFill(Color.LIMEGREEN);
+                statusLabel.setText("Connected");
             } else {
-                System.out.println(" Has failed to connect to the server.");
+                System.out.println("Failed to connect");
+                statusCircle.setFill(Color.RED);
+                statusLabel.setText("Connection Failed");
             }
         });
 
-        // Completing set up
-        Scene scene = new Scene(root, 900, 600);
+        Scene scene = new Scene(root, 900, 700);
         primaryStage.setTitle("BrainStorm Bubble - Client");
         primaryStage.setScene(scene);
         primaryStage.show();
     }
 
-    // Main bubble set up design
+    // Create styled buttons
+    private Button createStyledButton(String text, String color) {
+        Button button = new Button(text);
+        button.setStyle(
+                "-fx-background-color: " + color + "; " +
+                        "-fx-text-fill: white; " +
+                        "-fx-font-weight: bold; " +
+                        "-fx-font-size: 13px; " +
+                        "-fx-padding: 8 20; " +
+                        "-fx-background-radius: 5; " +
+                        "-fx-cursor: hand;"
+        );
+
+        // Hover effect
+        button.setOnMouseEntered(e -> {
+            button.setStyle(button.getStyle() + "-fx-opacity: 0.85;");
+        });
+        button.setOnMouseExited(e -> {
+            button.setStyle(button.getStyle().replace("-fx-opacity: 0.85;", ""));
+        });
+
+        return button;
+    }
+
+    // Create center bubble with nice styling
     private void createCenterBubble() {
-        double radius = 70; //  size
+        double radius = 70;
 
         Circle circle = new Circle(radius);
-        circle.setFill(Color.WHITE);
-        circle.setStroke(Color.BLACK);
-        circle.setStrokeWidth(2.5);
+        circle.setFill(Color.web("#667eea")); // Purple gradient color
+        circle.setStroke(Color.WHITE);
+        circle.setStrokeWidth(3);
 
-        // label
+        // Add shadow
+        DropShadow shadow = new DropShadow();
+        shadow.setColor(Color.rgb(0, 0, 0, 0.3));
+        shadow.setRadius(10);
+        circle.setEffect(shadow);
+
         centerLabel = new Text(mainIdeaText);
+        centerLabel.setFont(Font.font("Arial", FontWeight.BOLD, 14));
+        centerLabel.setFill(Color.WHITE);
+
         double textWidth = centerLabel.getLayoutBounds().getWidth();
         double textHeight = centerLabel.getLayoutBounds().getHeight();
         centerLabel.setX(-textWidth / 2);
         centerLabel.setY(textHeight / 4);
 
         centerBubbleGroup = new Group(circle, centerLabel);
-
-        // Ideal center
         centerBubbleGroup.setLayoutX(centerX);
         centerBubbleGroup.setLayoutY(centerY);
 
         canvas.getChildren().add(centerBubbleGroup);
     }
 
-    // sub bubbles design
+    // Create idea bubble with colors
+    private void createIdeaBubbleOnCanvas(String id, double x, double y, String text, Color color) {
+        double radius = 60;
 
-    private void createIdeaBubbleOnCanvas(String id, double x, double y, String text) {
-        double radius = 60; // size
         Circle circle = new Circle(radius);
-        circle.setFill(Color.WHITE);
-        circle.setStroke(Color.BLACK);
-        circle.setStrokeWidth(2.0);
+        circle.setFill(color);
+        circle.setStroke(Color.WHITE);
+        circle.setStrokeWidth(2.5);
 
-        // enter text
-        Text label = new Text(text);
+        // Add shadow
+        DropShadow shadow = new DropShadow();
+        shadow.setColor(Color.rgb(0, 0, 0, 0.2));
+        shadow.setRadius(8);
+        circle.setEffect(shadow);
+
+        // Truncate text if too long
+        String displayText = text.length() > 15 ? text.substring(0, 12) + "..." : text;
+
+        Text label = new Text(displayText);
+        label.setFont(Font.font("Arial", FontWeight.BOLD, 11));
+        label.setFill(Color.WHITE);
+
         double textWidth = label.getLayoutBounds().getWidth();
         double textHeight = label.getLayoutBounds().getHeight();
         label.setX(-textWidth / 2);
@@ -240,32 +305,49 @@ public class BrainstormClientGUI extends Application {
         Group bubbleGroup = new Group(circle, label);
         bubbleGroup.setLayoutX(x);
         bubbleGroup.setLayoutY(y);
-
-        // String ID
         bubbleGroup.setUserData(id);
 
-        // Connecting line
+        // Connection line with same color
         Line connectionLine = new Line();
-        connectionLine.setStroke(Color.BLACK);
-        connectionLine.setStrokeWidth(1.5);
+        connectionLine.setStroke(color);
+        connectionLine.setStrokeWidth(2);
         connectionLine.setStartX(centerX);
         connectionLine.setStartY(centerY);
         connectionLine.setEndX(x);
         connectionLine.setEndY(y);
-
+        connectionLine.setOpacity(0.7);
 
         canvas.getChildren().add(connectionLine);
         makeIdeaBubbleDraggable(bubbleGroup, connectionLine);
         canvas.getChildren().add(bubbleGroup);
 
-
-        BubbleData data = new BubbleData(id, x, y, text, bubbleGroup, connectionLine);
+        BubbleData data = new BubbleData(id, x, y, text, color, bubbleGroup, connectionLine);
         bubbleMap.put(id, data);
-    }
 
+        // Simple entrance animation
+        ScaleTransition scale = new ScaleTransition(Duration.millis(200), bubbleGroup);
+        scale.setFromX(0.5);
+        scale.setFromY(0.5);
+        scale.setToX(1);
+        scale.setToY(1);
+        scale.play();
+    }
 
     private void makeIdeaBubbleDraggable(Group bubbleGroup, Line line) {
         final Point2D[] dragOffset = new Point2D[1];
+
+        // Hover effect
+        bubbleGroup.setOnMouseEntered(e -> {
+            bubbleGroup.setScaleX(1.1);
+            bubbleGroup.setScaleY(1.1);
+            bubbleGroup.setCursor(javafx.scene.Cursor.HAND);
+        });
+
+        bubbleGroup.setOnMouseExited(e -> {
+            bubbleGroup.setScaleX(1.0);
+            bubbleGroup.setScaleY(1.0);
+            bubbleGroup.setCursor(javafx.scene.Cursor.DEFAULT);
+        });
 
         bubbleGroup.setOnMousePressed(event -> {
             event.consume();
@@ -285,11 +367,10 @@ public class BrainstormClientGUI extends Application {
                 bubbleGroup.setLayoutX(newX);
                 bubbleGroup.setLayoutY(newY);
 
-
                 line.setEndX(newX);
                 line.setEndY(newY);
 
-                Object userData = bubbleGroup.getUserData(); // searching user data
+                Object userData = bubbleGroup.getUserData();
                 if (userData instanceof String) {
                     String id = (String) userData;
                     BubbleData data = bubbleMap.get(id);
@@ -297,9 +378,8 @@ public class BrainstormClientGUI extends Application {
                         data.x = newX;
                         data.y = newY;
 
-
                         if (networkClient != null && networkClient.isConnected() && messageHandler != null) {
-                            messageHandler.updateBubble(id, newX, newY, null); // means that users must update
+                            messageHandler.updateBubble(id, newX, newY, null);
                         }
                     }
                 }
@@ -307,23 +387,26 @@ public class BrainstormClientGUI extends Application {
         });
     }
 
+    // Network callbacks
+    public void onNetworkBubbleCreated(Bubble bubble) {
+        Color bubbleColor = BUBBLE_COLORS[colorIndex % BUBBLE_COLORS.length];
+        colorIndex++;
 
-    public void onNetworkBubbleCreated(Bubble bubble) { // retrieving ID
         createIdeaBubbleOnCanvas(
                 bubble.getId(),
                 bubble.getX(),
                 bubble.getY(),
-                bubble.getText()
+                bubble.getText(),
+                bubbleColor
         );
     }
-
 
     public void onNetworkBubbleUpdated(Bubble bubble) {
         String id = bubble.getId();
         BubbleData data = bubbleMap.get(id);
 
         if (data == null) {
-            createIdeaBubbleOnCanvas(id, bubble.getX(), bubble.getY(), bubble.getText());
+            onNetworkBubbleCreated(bubble);
             return;
         }
 
@@ -331,18 +414,19 @@ public class BrainstormClientGUI extends Application {
         data.y = bubble.getY();
         data.text = bubble.getText();
 
-
         Group group = data.view;
         group.setLayoutX(data.x);
         group.setLayoutY(data.y);
         data.line.setEndX(data.x);
         data.line.setEndY(data.y);
 
-        // Updating text on bubble
         for (Node node : group.getChildren()) {
             if (node instanceof Text) {
                 Text label = (Text) node;
-                label.setText(data.text);
+                String displayText = data.text.length() > 15 ?
+                        data.text.substring(0, 12) + "..." :
+                        data.text;
+                label.setText(displayText);
                 double textWidth = label.getLayoutBounds().getWidth();
                 double textHeight = label.getLayoutBounds().getHeight();
                 label.setX(-textWidth / 2);
@@ -351,22 +435,18 @@ public class BrainstormClientGUI extends Application {
         }
     }
 
-
     public void onNetworkBubbleDeleted(String id) {
         BubbleData data = bubbleMap.remove(id);
-        if (data == null) {
-            return;
-        }
+        if (data == null) return;
 
         canvas.getChildren().remove(data.line);
         canvas.getChildren().remove(data.view);
     }
 
-
     public void onNetworkResetAllBubbles() {
         canvas.getChildren().clear();
         bubbleMap.clear();
-        nextBubbleIdForLayout = 1;
+        colorIndex = 0;
         createCenterBubble();
     }
 
@@ -381,9 +461,7 @@ public class BrainstormClientGUI extends Application {
         }
     }
 
-
     public static void main(String[] args) {
         launch(args);
     }
 }
-

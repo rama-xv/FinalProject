@@ -5,36 +5,35 @@ import org.json.JSONException;
 import java.util.*;
 
 /**
- * MessageHandler.java
+ * MessageHandler.java( the central controller/brain of the client)
+ * mantain local copies of bubbles and connections
  * Processes all incoming/outgoing messages between client, server, and GUI.
  */
 public class MessageHandler {
 
     // Data storage
-    private Map<String, Bubble> bubbles;
-    private List<Connection> connections;
-
-    // References to other components
-    // Commented out temporarily since GUI doesn't exist yet
+    private Map<String, Bubble> bubbles;// Stores all bubbles currently on the client
+    private List<Connection> connections;// Stores all connections between bubbles
     // private BrainstormClientGUI gui;
-    private Object gui;  // Placeholder for now
+    private Object gui;
+    private NetworkClient client;// The NetworkClient used to send messages to server
+    private String clientId;// Unique ID assigned to this client by server
 
-    private NetworkClient client;
-    private String clientId;
-
-    // Constructor - for now accepts null since GUI doesn't exist
-
+    // Constructor: initializes data and generates client ID
     public MessageHandler(Object gui) {
         this.gui = gui;
         this.bubbles = new HashMap<>();
         this.connections = new ArrayList<>();
         this.clientId = generateClientId();
     }
-
+    // Allows GUI to attach the network client
     public void setNetworkClient(NetworkClient client) {
         this.client = client;
     }
-    // INCOMING MESSAGE PROCESSING
+    // INCOMING MESSAGE PROCESSING:to add bubble, update it, delete it,
+    // create connection, to load initial state, update main idea, and cleat all
+    //All messages from the server arrive here as JSON strings.
+    // We decode the message and forward it to the correct handler.
     public void handleIncomingMessage(String jsonMessage) {
         try {
             JSONObject json = new JSONObject(jsonMessage);
@@ -57,6 +56,7 @@ public class MessageHandler {
                     handleConnectionDelete(json);
                     break;
                 case "client_id":
+                    // Server assigns a unique ID to this client
                     this.clientId = json.getString("id");
                     System.out.println("Assigned client ID: " + clientId);
                     break;
@@ -78,9 +78,12 @@ public class MessageHandler {
             System.err.println("Error details: " + e.getMessage());
         }
     }
-
-    private void handleBubbleCreate(JSONObject json) {
+    /*user update->it updates bubbles and connections->builds description json message
+    ->send it to server nby network client
+    */
+    private void handleBubbleCreate(JSONObject json) {// Handles creation of a new bubble sent from the server
         try {
+            // Extract required bubble fields
             String id = json.getString("id");
             double x = json.getDouble("x");
             double y = json.getDouble("y");
@@ -90,14 +93,6 @@ public class MessageHandler {
 
             Bubble bubble = new Bubble(id, x, y, text, color, createdBy);
             bubbles.put(id, bubble);
-
-            // GUI update removed temporarily - will add back when Person 3 is done
-            // Platform.runLater(() -> {
-            //     if (gui != null) {
-            //         gui.addBubbleToCanvas(bubble);
-            //     }
-            // });
-
             System.out.println("Created bubble: " + id + " at (" + x + ", " + y + ")");
 
             // notifying BrainstormClientGUI to add this bubble
@@ -110,7 +105,7 @@ public class MessageHandler {
             System.err.println("ERROR: Invalid bubble_create message format");
         }
     }
-
+// Handles updates to an existing bubble
     private void handleBubbleUpdate(JSONObject json) {
         try {
             String id = json.getString("id");
@@ -120,7 +115,6 @@ public class MessageHandler {
                 System.err.println("ERROR: Cannot update non-existent bubble: " + id);
                 return;
             }
-
             if (json.has("x")) bubble.setX(json.getDouble("x"));
             if (json.has("y")) bubble.setY(json.getDouble("y"));
             if (json.has("text")) bubble.setText(json.getString("text"));
@@ -138,7 +132,7 @@ public class MessageHandler {
             System.err.println("ERROR: Invalid bubble_update message format");
         }
     }
-
+// Handles deletion of a bubble
     private void handleBubbleDelete(JSONObject json) {
         try {
             String id = json.getString("id");
@@ -148,14 +142,14 @@ public class MessageHandler {
                 System.err.println("WARNING: Tried to delete non-existent bubble: " + id);
                 return;
             }
-
+            // Remove any connections linked to this bubble
             connections.removeIf(conn ->
                     conn.getFromBubbleId().equals(id) || conn.getToBubbleId().equals(id)
             );
 
             System.out.println("Deleted bubble: " + id);
 
-            // Tell BrainstormClientGUIto remove bubble
+            //  remove bubble in GUI
             if (gui instanceof BrainstormClientGUI) {
                 BrainstormClientGUI realGui = (BrainstormClientGUI) gui;
                 Platform.runLater(() -> realGui.onNetworkBubbleDeleted(id));
@@ -165,7 +159,7 @@ public class MessageHandler {
             System.err.println("ERROR: Invalid bubble_delete message format");
         }
     }
-
+// Handles creation of a connection between bubbles
     private void handleConnectionCreate(JSONObject json) {
         try {
             String fromId = json.getString("from");
@@ -185,7 +179,6 @@ public class MessageHandler {
             System.err.println("ERROR: Invalid connection_create message format");
         }
     }
-
     private void handleConnectionDelete(JSONObject json) {
         try {
             String fromId = json.getString("from");
@@ -285,9 +278,9 @@ public class MessageHandler {
         // Show bubble on this client immediately
         if (gui instanceof BrainstormClientGUI) {
             BrainstormClientGUI realGui = (BrainstormClientGUI) gui;
-            Platform.runLater(() -> realGui.onNetworkBubbleCreated(bubble));
+            Platform.runLater(() -> realGui.onNetworkBubbleCreated(bubble));//call gui to draw the update
         }
-
+        // Build update message
         JSONObject json = new JSONObject();
         json.put("type", "bubble_create");
         json.put("id", id);
@@ -306,7 +299,6 @@ public class MessageHandler {
             System.err.println("ERROR: Cannot update non-existent bubble: " + id);
             return;
         }
-
         if (newX != null) bubble.setX(newX);
         if (newY != null) bubble.setY(newY);
         if (newText != null) bubble.setText(newText);
@@ -320,9 +312,10 @@ public class MessageHandler {
 
         sendToServer(json);
     }
-
+// Sends bubble deletion to server
     public void deleteBubble(String id) {
         bubbles.remove(id);
+        // Remove any related connections
         connections.removeIf(conn ->
                 conn.getFromBubbleId().equals(id) || conn.getToBubbleId().equals(id)
         );
@@ -330,19 +323,15 @@ public class MessageHandler {
         JSONObject json = new JSONObject();
         json.put("type", "bubble_delete");
         json.put("id", id);
-
         sendToServer(json);
     }
-
     public void createConnection(String fromId, String toId) {
         if (!bubbles.containsKey(fromId) || !bubbles.containsKey(toId)) {
             System.err.println("ERROR: Cannot create connection - bubble(s) don't exist");
             return;
         }
-
         Connection conn = new Connection(fromId, toId);
         connections.add(conn);
-
         JSONObject json = new JSONObject();
         json.put("type", "connection_create");
         json.put("from", fromId);
@@ -382,6 +371,7 @@ public class MessageHandler {
         sendToServer(json);
     }
     // UTILITY METHODS
+
     private void sendToServer(JSONObject json) {
         if (client != null && client.isConnected()) {
             client.sendMessage(json.toString());
@@ -409,6 +399,7 @@ public class MessageHandler {
     public Bubble getBubble(String id) {
         return bubbles.get(id);
     }
+
     // TESTING
 
     public static void main(String[] args) {
@@ -425,7 +416,6 @@ public class MessageHandler {
         // Test creating bubble
         handler.createBubble(300, 400, "Another bubble");
         System.out.println("Total bubbles after create: " + handler.getAllBubbles().size());
-
         System.out.println("\n MessageHandler working correctly!");
     }
 }
